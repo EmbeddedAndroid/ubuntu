@@ -1,5 +1,5 @@
 #
-# Ubuntu Dockerfile
+# Zephyr Build Container
 #
 # https://github.com/dockerfile/ubuntu
 #
@@ -16,6 +16,8 @@ RUN \
   apt-get install -y software-properties-common && \
   apt-get install -y byobu curl git htop man unzip vim wget && \
   apt-get install -y git make gcc g++ python3-ply ncurses-dev lib32z1 lib32ncurses5 && \
+  apt-get install -y apache2 python && \
+  rm -rf /var/www/html/index.html && \
   rm -rf /var/lib/apt/lists/*
 
 # Setup Build Enviroment
@@ -42,5 +44,8 @@ ENV HOME /root
 # Define working directory.
 WORKDIR /root
 
+# Copy build script
+COPY build-zephyr.sh /root/build-zephyr.sh
+
 # Define default command.
-CMD ["bash"]
+CMD ./build-zephyr.sh && bash
