@@ -27,11 +27,17 @@ ENV GCCARMEMB_TOOLCHAIN_PATH /root/gcc-arm-none-eabi-5_4-2016q2
 ENV ZEPHYR_GCC_VARIANT gccarmemb
 ENV CROSS_COMPILE /root/gcc-arm-none-eabi-5_4-2016q2/bin/arm-none-eabi-
 
-# Build.
+# Pull GCC ARM Embedded Toolchain.
 RUN \
   cd /root && \
   wget https://launchpad.net/gcc-arm-embedded/5.0/5-2016-q2-update/+download/gcc-arm-none-eabi-5_4-2016q2-20160622-linux.tar.bz2 && \
   tar -C . -xaf gcc-arm-none-eabi-5_4-2016q2-20160622-linux.tar.bz2
+
+# Setup Zephyr Mirror
+RUN \
+  mkdir -p /srv/mirrors && \
+  cd /srv/mirrors && \
+  git clone --mirror https://gerrit.zephyrproject.org/r/zephyr zephyr-mirror
 
 # Add files.
 ADD root/.bashrc /root/.bashrc
@@ -46,6 +52,11 @@ WORKDIR /root
 
 # Copy build script
 COPY build-zephyr.sh /root/build-zephyr.sh
+# Copy services script
+COPY start-services.sh /root/start-services.sh
+# Copy apache2 configuration
+COPY ports.conf /etc/apache2/ports.conf
+COPY 000-default.conf /etc/apache2/sites-enabled/000-default.conf
 
 # Define default command.
-CMD ./build-zephyr.sh && bash
+CMD ./start-services.sh && ./build-zephyr.sh && bash

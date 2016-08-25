@@ -13,7 +13,7 @@ if [ -z "$ZEPHYR_OUTDIR" ]; then
 	export ZEPHYR_OUTDIR=/root/zephyr-outdir
 fi
 
-git clone $ZEPHYR_SOURCE zephyr-project
+git clone --reference /srv/mirrors/zephyr-mirror $ZEPHYR_SOURCE zephyr-project
 cd zephyr-project
 source zephyr-env.sh
 sanitycheck --platform $ZEPHYR_PLATFORM --build-only --outdir $ZEPHYR_OUTDIR --enable-slow
