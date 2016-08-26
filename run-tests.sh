@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -z "$ZEPHYR_PLATFORM" ]; then
+	export ZEPHYR_PLATFORM=qemu_cortex_m3
+fi
+
 echo "Fetching LAVA API Key Started $(date +"%T")" >> /var/www/html/seq.txt
 wget http://lava/tmp/apikey.txt
 echo "Fetching LAVA API Key Finished $(date +"%T")" >> /var/www/html/seq.txt
