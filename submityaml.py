@@ -7,7 +7,7 @@ import xmlrpclib
 import urllib2
 import yaml
 
-SLEEP = 5
+SLEEP = 1
 __version__ = 0.5
 
 
@@ -66,7 +66,7 @@ def gettestResult(jobid):
     response = urllib2.urlopen(url)
     raw = response.read()
     results = yaml.load(raw)
-    with open('results.txt', 'w') as r:
+    with open('results.txt', 'a') as r:
         for result in results:
             if result['suite'] != 'lava':
                 output = '%s : %s : %s' % (result['suite'], result['name'], result['result'])
