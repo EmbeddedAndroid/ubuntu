@@ -19,7 +19,7 @@ actions:
     images:
         kernel:
           image_arg: -kernel {kernel}
-          url: http://localhost:8000/zephyr/qemu_cortex_m3/tests/crypto/test_cbc/test/zephyr.bin
+          url: http://localhost:8000/zephyr/{PLATFORM}/tests/crypto/test_cbc/test/zephyr.bin
 
 - boot:
     method: monitor

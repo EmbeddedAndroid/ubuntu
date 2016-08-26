@@ -1,6 +1,6 @@
 # Zephyr JOB definition for QEMU
 device_type: qemu-cortex-m3
-job_name: qemu-cortex-m3-zephyr-crypto-test-cmac-mode
+job_name: qemu-cortex-m3-zephyr-crypto-test-hmac-rfc4231-vectors
 
 timeouts:
   job:
@@ -19,7 +19,7 @@ actions:
     images:
         kernel:
           image_arg: -kernel {kernel}
-          url: http://localhost:8000/zephyr/{PLATFORM}/tests/crypto/test_cmac_mode/test/zephyr.bin
+          url: http://localhost:8000/zephyr/{PLATFORM}/tests/crypto/test_hmac/test/zephyr.bin
 
 - boot:
     method: monitor
@@ -28,7 +28,7 @@ actions:
 
 - test:
     monitor:
-      name: Test CMAC Mode
+      name: Test HMAC RFC4231 vectors
       start: tc_start()
       end: PROJECT EXECUTION
       pattern: (?P<result>(PASS|FAIL))\s-\s(?P<test_case_id>\w+)
