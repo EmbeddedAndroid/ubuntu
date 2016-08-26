@@ -7,7 +7,7 @@ import xmlrpclib
 import urllib2
 import yaml
 
-SLEEP = 1
+SLEEP = .5
 __version__ = 0.5
 
 
