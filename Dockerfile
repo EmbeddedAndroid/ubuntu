@@ -58,7 +58,7 @@ COPY start-services.sh /root/start-services.sh
 COPY ports.conf /etc/apache2/ports.conf
 COPY 000-default.conf /etc/apache2/sites-enabled/000-default.conf
 # Copy LAVA helpers
-COPY aes128-test.yaml /root/aes128-test.yaml
+COPY *.yaml /root/
 COPY submityaml.py /root/submityaml.py
 COPY run-tests.sh /root/run-tests.sh
 
