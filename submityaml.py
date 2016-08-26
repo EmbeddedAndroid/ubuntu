@@ -25,7 +25,7 @@ def setup_args_parser():
     """
     description = "Submit job file"
     parser = argparse.ArgumentParser(version=__version__, description=description)
-    parser.add_argument("yamlfile", help="specify target job file", metavar="FILE",
+    parser.add_argument("yamlfiles", help="specify target job files", nargs = '*', metavar="FILE",
                    type=lambda x: is_valid_file(parser, x, 'r'))
     parser.add_argument("-d", "--debug", action="store_true", help="Display verbose debug details")
     parser.add_argument("-p", "--poll", action="store_true", help="poll job status until job completes")
@@ -40,20 +40,25 @@ def loadConfiguration():
     args = setup_args_parser()
 
 
-def loadJob(server_str):
-    """loadJob - read the JSON job file and fix it up for future submission
+def loadJobs(server_str):
+    """loadJobs - read the YAML job files and fix it up for future submission
     """
-    return args.yamlfile.read()
+    jobs = []
+    for yaml in args.yamlfiles:
+	jobs.append(yaml.read())
+    return jobs
 
 
-def submitJob(yamlfile, server):
-    """submitJob - XMLRPC call to submit a JSON file
+def submitJobs(jobs, server):
+    """submitJobs - XMLRPC call to submit YAML job files
 
-       returns jobid of the submitted job
+       returns list ofjobids of the submitted jobs
     """
+    jobids = []
     # When making the call to submit_job, you have to send a string
-    jobid = server.scheduler.submit_job(yamlfile)
-    return jobid
+    for job in jobs:
+        jobids.append(server.scheduler.submit_job(job))
+    return jobids
 
 
 def gettestResult(jobid):
@@ -69,41 +74,39 @@ def gettestResult(jobid):
                 print output
 
 
-def monitorJob(jobid, server, server_str):
-    """monitorJob - added to poll for a job to complete
+def monitorJobs(jobids, server, server_str):
+    """monitorJobs - added to poll for jobs to complete
 
     """
     if args.poll:
         sys.stdout.write("Job polling enabled\n")
-        # wcount = number of times we loop while the job is running
-        wcount = 0
-        # count = number of times we loop waiting for the job to start
-        count = 0
-        while True:
-            status = server.scheduler.job_status(jobid)
-            if status['job_status'] == 'Complete':
-                gettestResult(jobid)
-                break
-            elif status['job_status'] == 'Canceled':
-                print '\nJob Canceled'
-                exit(0)
-            elif status['job_status'] == 'Submitted':
-                sys.stdout.write("Job waiting to run for % 2d seconds\n" % (wcount * SLEEP))
-                sys.stdout.flush()
-                wcount += 1
-            elif status['job_status'] == 'Running':
-                sys.stdout.write("Job Running for % 2d seconds\n" % (count * SLEEP))
-                sys.stdout.flush()
-                count += 1
-            else:
-                print "unknown status"
-                exit(0)
-            time.sleep(SLEEP)
-        print '\n\nJob Completed: ' + str(count * SLEEP) + ' s (' + str(wcount * SLEEP) + ' s in queue)'
+        run = True
+        while run:
+                if len(jobids) == 0:
+                    run = False
+		for job in jobids:
+			status = server.scheduler.job_status(job)
+			if status['job_status'] == 'Complete':
+		            print 'Job %s Completed' % job
+			    gettestResult(job)
+			    jobids.pop(jobids.index(job))
+			elif status['job_status'] == 'Canceled':
+			    print 'Job %s Canceled' % job
+			    jobids.pop(jobids.index(job))
+			elif status['job_status'] == 'Submitted':
+			    sys.stdout.write("Job %s Submitted\n" % job)
+			    sys.stdout.flush()
+			elif status['job_status'] == 'Running':
+			    sys.stdout.write("Job %s Running\n" % job)
+			    sys.stdout.flush()
+			else:
+			    print "unknown status"
+			    jobids.pop(jobids.index(job))
+			time.sleep(SLEEP) 
 
 
 def process():
-    print "Submitting test job to LAVA server"
+    print "Submitting test jobs to LAVA server"
     loadConfiguration()
     user = "admin"
     with open(args.apikey) as f:
@@ -115,11 +118,11 @@ def process():
     server = xmlrpclib.ServerProxy(xmlrpc_str)
     server.system.listMethods()
 
-    yamlfile = loadJob(server_str)
+    jobs = loadJobs(server_str)
 
-    jobid = submitJob(yamlfile, server)
+    jobids = submitJobs(jobs, server)
 
-    monitorJob(jobid, server, server_str)
+    monitorJobs(jobids, server, server_str)
 
 
 if __name__ == '__main__':
