@@ -1,0 +1,37 @@
+# Zephyr JOB definition for QEMU
+device_type: qemu-cortex-m3
+job_name: qemu-cortex-m3-zephyr-kernel-nano-timer-test
+
+timeouts:
+  job:
+    minutes: 6
+  action:
+    minutes: 2
+priority: medium
+visibility: public
+
+actions:
+- deploy:
+    timeout:
+      minutes: 3
+    to: tmpfs
+    type: monitor
+    images:
+        kernel:
+          image_arg: -kernel {kernel}
+          url: http://localhost:8000/zephyr/{PLATFORM}/tests/kernel/test_timer/nanokernel/test/zephyr.bin
+
+- boot:
+    method: monitor
+    timeout:
+      minutes: 2
+
+- test:
+    monitor:
+      name: Test Nanokernel Timers
+      start: tc_start()
+      end: PROJECT EXECUTION
+      pattern: (?P<result>(PASS|FAIL))\s-\s(?P<test_case_id>\w+)
+      fixupdict:
+        PASS: pass
+        FAIL: fail
