@@ -16,8 +16,8 @@ RUN \
   apt-get install -y software-properties-common && \
   apt-get install -y byobu curl git htop man unzip vim wget && \
   apt-get install -y git make gcc g++ python3-ply ncurses-dev lib32z1 lib32ncurses5 && \
-  apt-get install -y apache2 python python-yaml && \
-  rm -rf /var/www/html/index.html && \
+  apt-get install -y python python-yaml python-zmq && \
+  mkdir -p /mnt/artifacts && \
   rm -rf /var/lib/apt/lists/*
 
 # Setup Build Enviroment
@@ -51,16 +51,10 @@ ENV HOME /root
 WORKDIR /root
 
 # Copy build script
-COPY build-zephyr.sh /root/build-zephyr.sh
-# Copy services script
-COPY start-services.sh /root/start-services.sh
-# Copy apache2 configuration
-COPY ports.conf /etc/apache2/ports.conf
-COPY 000-default.conf /etc/apache2/sites-enabled/000-default.conf
+COPY build-test-zephyr.sh /root/build-test-zephyr.sh
 # Copy LAVA helpers
 COPY *.yaml /root/
 COPY submityaml.py /root/submityaml.py
-COPY run-tests.sh /root/run-tests.sh
 
 # Define default command.
-CMD ./start-services.sh && ./build-zephyr.sh && ./run-tests.sh && bash
+CMD ./build-test-zephyr.sh && bash

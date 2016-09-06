@@ -7,7 +7,7 @@ import xmlrpclib
 import urllib2
 import yaml
 
-SLEEP = 1
+SLEEP = .5
 __version__ = 0.5
 
 
@@ -62,7 +62,7 @@ def submitJobs(jobs, server):
 
 
 def gettestResult(jobid):
-    url = 'http://localhost/results/%s/yaml' % jobid
+    url = 'http://lava-titan/results/%s/yaml' % jobid
     response = urllib2.urlopen(url)
     raw = response.read()
     results = yaml.load(raw)
@@ -113,8 +113,8 @@ def process():
         line = f.readline()
         apikey = line.rstrip('\n')
 
-    server_str = 'http://localhost' + ":" + args.port
-    xmlrpc_str = 'http://' + user + ":" + apikey + "@localhost" + ":" + args.port + '/RPC2/'
+    server_str = 'http://lava-titan' + ":" + args.port
+    xmlrpc_str = 'http://' + user + ":" + apikey + "@lava-titan" + ":" + args.port + '/RPC2/'
     server = xmlrpclib.ServerProxy(xmlrpc_str)
     server.system.listMethods()
 
