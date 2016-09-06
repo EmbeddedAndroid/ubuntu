@@ -42,7 +42,7 @@ echo "Build Finished $(date +"%T")" >> /mnt/artifacts/$ZEPHYR_BUILD_ID/results.t
 
 # Test
 echo "Fetching LAVA API Key Started $(date +"%T")" >> /mnt/artifacts/$ZEPHYR_BUILD_ID/results.txt
-wget http://lava-titan/tmp/apikey.txt
+wget http://lava-titan:9003/tmp/apikey.txt
 echo "Fetching LAVA API Key Finished $(date +"%T")" >> /mnt/artifacts/$ZEPHYR_BUILD_ID/results.txt
 echo "Running Tests Started $(date +"%T")" >> /mnt/artifacts/$ZEPHYR_BUILD_ID/results.txt
 sed -i -e "s/{PLATFORM}/$ZEPHYR_PLATFORM/g" *.yaml
