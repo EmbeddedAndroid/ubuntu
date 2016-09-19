@@ -1,0 +1,6 @@
+Host gitci.com
+    Hostname 192.168.1.2
+    User git
+    Port 9002
+    StrictHostKeyChecking no
+    IdentityFile /root/.ssh/id_rsa

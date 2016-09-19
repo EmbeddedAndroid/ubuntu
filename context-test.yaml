@@ -19,7 +19,7 @@ actions:
     images:
         kernel:
           image_arg: -kernel {kernel}
-          url: http://simple-storage:5000/{BUILD}/{PLATFORM}/tests/kernel/test_context/test/zephyr.bin
+          url: http://simple-storage:5000/{BUILD}/{PLATFORM}/kernel/test_context/test/zephyr.bin
 
 - boot:
     method: monitor

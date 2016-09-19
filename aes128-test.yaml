@@ -19,7 +19,7 @@ actions:
     images: 
         kernel: 
           image_arg: -kernel {kernel}
-          url: http://simple-storage:5000/{BUILD}/{PLATFORM}/tests/crypto/test_aes/test/zephyr.bin
+          url: http://simple-storage:5000/{BUILD}/{PLATFORM}/crypto/test_aes/test/zephyr.bin
 
 
 - boot:

@@ -1,11 +1,13 @@
 #!/usr/bin/python
 import argparse
 import os.path
+import os
 import sys
 import time
 import xmlrpclib
 import urllib2
 import yaml
+import zmq
 
 SLEEP = .5
 __version__ = 0.5
@@ -61,15 +63,18 @@ def submitJobs(jobs, server):
     return jobids
 
 
-def gettestResult(jobid):
-    url = 'http://lava-titan:9003/results/%s/yaml' % jobid
+def gettestResult(jobid, port, socket):
+    url = 'http://lava-titan:%s/results/%s/yaml' % (port, jobid)
     response = urllib2.urlopen(url)
     raw = response.read()
     results = yaml.load(raw)
     with open('results.txt', 'a') as r:
         for result in results:
             if result['suite'] != 'lava':
-                output = '%s : %s : %s' % (result['suite'], result['name'], result['result'])
+                output = '%s : %s' % (result['suite'], result['name'])
+                build_id = os.environ['ZEPHYR_BUILD_ID']
+                message = { 'type': 'TEST', 'status': result['result'].upper(), 'id' : build_id, 'message': output }
+                socket.send_json(message)
                 r.write(output + '\n')
                 print output
 
@@ -80,6 +85,9 @@ def monitorJobs(jobids, server, server_str):
     """
     if args.poll:
         sys.stdout.write("Job polling enabled\n")
+        context = zmq.Context()
+        zmq_socket = context.socket(zmq.PUSH)
+        zmq_socket.connect('tcp://broker:5555')
         run = True
         while run:
                 if len(jobids) == 0:
@@ -88,7 +96,7 @@ def monitorJobs(jobids, server, server_str):
 			status = server.scheduler.job_status(job)
 			if status['job_status'] == 'Complete':
 		            print 'Job %s Completed' % job
-			    gettestResult(job)
+			    gettestResult(job, args.port, zmq_socket)
 			    jobids.pop(jobids.index(job))
 			elif status['job_status'] == 'Canceled':
 			    print 'Job %s Canceled' % job
@@ -100,7 +108,7 @@ def monitorJobs(jobids, server, server_str):
 			    sys.stdout.write("Job %s Running\n" % job)
 			    sys.stdout.flush()
 			else:
-			    print "unknown status"
+			    print "Unknown Status"
 			    jobids.pop(jobids.index(job))
 			time.sleep(SLEEP) 
 
@@ -113,8 +121,8 @@ def process():
         line = f.readline()
         apikey = line.rstrip('\n')
 
-    server_str = 'http://lava-titan:9003' + ":" + args.port
-    xmlrpc_str = 'http://' + user + ":" + apikey + "@lava-titan:9003" + ":" + args.port + '/RPC2/'
+    server_str = 'http://lava-titan' + ":" + args.port
+    xmlrpc_str = 'http://' + user + ":" + apikey + "@lava-titan" + ":" + args.port + '/RPC2/'
     server = xmlrpclib.ServerProxy(xmlrpc_str)
     server.system.listMethods()
 
